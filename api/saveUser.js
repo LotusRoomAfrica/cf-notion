@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   const { data, error } = await supabase
     .from('users')
     .insert([{ name, email, brand_summary, campaign_type }])
-
+.select()
   if (error) {
     return res.status(500).json({ error: error.message })
   }
