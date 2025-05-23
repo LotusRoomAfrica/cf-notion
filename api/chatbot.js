@@ -1,9 +1,3 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST requests allowed" });
-  }
-
-  // Your logic goes here
 }
 import { createClient } from '@supabase/supabase-js'
 
