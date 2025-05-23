@@ -1,27 +1,20 @@
-}
-import { createClient } from '@supabase/supabase-js'
+module.exports = async function handler(req, res) {
+  try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+    const { prompt, userId } = req.body;
+    if (!prompt || !userId) {
+      return res.status(400).json({ error: "Missing prompt or userId" });
+    }
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST requests allowed' })
+    // Simulated AI reply
+    const reply = `Simulated reply to: "${prompt}"`;
+
+    return res.status(200).json({ reply });
+  } catch (error) {
+    console.error("API Error:", error);
+    return res.status(500).json({ error: "Something went wrong!" });
   }
-
-  // Step 4: AUTH CHECK will go here
-
-  // Step 5: Extract prompt and userId from request body
-  const { prompt, userId } = req.body
-
-  if (!prompt || !userId) {
-    return res.status(400).json({ error: 'Missing prompt or userId' })
-  }
-
-  // Step 6: Call Hugging Face API
-
-  // Step 7: Save prompt and response to Supabase
-
-  // Step 8: Return chatbot reply
-}
-
-
+};
