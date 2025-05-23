@@ -10,9 +10,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Call Hugging Face API
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/gpt2',  // Change to your model if needed
+      'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
       {
         method: 'POST',
         headers: {
@@ -25,9 +24,10 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    const botReply = data[0]?.generated_text || "Sorry, I couldn't generate a reply.";
-
-    // You can add code here to save to Supabase if you want (optional)
+    const botReply =
+      data?.generated_text ||
+      data?.[0]?.generated_text ||
+      "Sorry, I couldn't generate a reply.";
 
     return res.status(200).json({ reply: botReply });
   } catch (error) {
