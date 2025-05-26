@@ -1,9 +1,4 @@
-import supabase from '../../lib/supabaseClient';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+import supabase from '../../lib/supabaseClient'; // Make sure this import is at the top
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -17,6 +12,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Call your Hugging Face API here
     const response = await fetch(
       'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
       {
@@ -30,17 +26,14 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
-      return res
-        .status(response.status)
-        .json({ error: 'Error from Hugging Face API' });
+      return res.status(response.status).json({ error: 'Error from Hugging Face API' });
     }
 
     const data = await response.json();
-    const reply =
-      data?.[0]?.generated_text ||
-      data?.generated_text ||
-      'No reply from model.';
 
+    const reply = data?.[0]?.generated_text || data?.generated_text || 'No reply from model.';
+
+    // <-- **PUT the Supabase insert here:** -->
     const { error } = await supabase.from('chat_sessions').insert([
       {
         user_id: userId,
@@ -51,9 +44,12 @@ export default async function handler(req, res) {
 
     if (error) {
       console.error('Supabase error:', error);
+      // Optionally send back an error response or just log it
     }
 
+    // Return the chatbot reply to the user
     res.status(200).json({ reply });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
