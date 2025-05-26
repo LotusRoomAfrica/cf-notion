@@ -10,55 +10,55 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Only POST requests allowed' });
   }
 
-  const { prompt, userId = null } = req.body;
-  if (!prompt) {
-    return res.status(400).json({ error: 'Missing prompt' });
+  const { prompt, userId } = req.body;
+
+  if (!prompt || !userId) {
+    return res.status(400).json({ error: 'Missing prompt or userId' });
   }
 
   try {
-    // 1. Query Hugging Face
-    const hfResponse = await fetch(
-      "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta",
+    // 1. Call Hugging Face model
+    const response = await fetch(
+      'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
       {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ inputs: prompt }),
       }
     );
 
-    if (!hfResponse.ok) {
-      return res.status(hfResponse.status).json({ error: "Error from Hugging Face API" });
+    if (!response.ok) {
+      return res
+        .status(response.status)
+        .json({ error: 'Error from Hugging Face API' });
     }
 
-    const data = await hfResponse.json();
-
+    const data = await response.json();
     const reply =
       data?.[0]?.generated_text ||
       data?.generated_text ||
-      "No reply from model.";
+      'No reply from model.';
 
-    // 2. Save to Supabase
-    const { error: dbError } = await supabase
-      .from('chat_sessions')
-      .insert([
-        {
-          user_id: userId,
-          user_input: prompt,
-          bot_output: reply,
-        },
-      ]);
+    // 2. Store in Supabase
+    const { error } = await supabase.from('chat_sessions').insert([
+      {
+        user_id: userId,
+        user_input: prompt,
+        bot_output: reply,
+      },
+    ]);
 
-    if (dbError) {
-      console.error("Supabase Insert Error:", dbError);
+    if (error) {
+      console.error('Supabase error:', error);
     }
 
-    // 3. Return response
+    // 3. Return chatbot reply
     res.status(200).json({ reply });
   } catch (error) {
-    console.error("Server Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }
