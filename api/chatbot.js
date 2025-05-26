@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+      'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
       {
         method: 'POST',
         headers: {
@@ -24,10 +24,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    const botReply =
-      data?.generated_text ||
-      data?.[0]?.generated_text ||
-      "Sorry, I couldn't generate a reply.";
+    const botReply = data?.[0]?.generated_text || "Sorry, I couldn't generate a reply.";
 
     return res.status(200).json({ reply: botReply });
   } catch (error) {
