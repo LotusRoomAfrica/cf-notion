@@ -17,7 +17,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Call Hugging Face model
     const response = await fetch(
       'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
       {
@@ -42,7 +41,6 @@ export default async function handler(req, res) {
       data?.generated_text ||
       'No reply from model.';
 
-    // 2. Store in Supabase
     const { error } = await supabase.from('chat_sessions').insert([
       {
         user_id: userId,
@@ -55,7 +53,6 @@ export default async function handler(req, res) {
       console.error('Supabase error:', error);
     }
 
-    // 3. Return chatbot reply
     res.status(200).json({ reply });
   } catch (error) {
     console.error(error);
